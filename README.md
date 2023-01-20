@@ -31,6 +31,6 @@ bachelor’s in science (TKT)
 English
 
 ### Sources
-https://www.ietf.org/rfc/rfc1951.txt 
-https://en.wikipedia.org/wiki/Deflate 
+https://www.ietf.org/rfc/rfc1951.txt  
+https://en.wikipedia.org/wiki/Deflate  
 https://www.youtube.com/watch?v=oi2lMBBjQ8s
