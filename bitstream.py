@@ -13,18 +13,10 @@ class BitStream:
     def fill_buffer(self):
         self.buffer = int.from_bytes(self.bytes, "little")
 
-
-
     def fill_one_bit(self):
         if self.byte_idx == len(self.bytes) and self.bit_idx > 7:
             exit("BIT OUT OF RANGE")
         self.buffer
 
-
     def read_n_bits(self, n):
         pass
-
-
-
-
-
