@@ -1,6 +1,6 @@
 from bitstream import BitStream
 from dataclasses import dataclass
-
+from decompressor import Decompressor
 
 @dataclass
 class Header:
@@ -13,15 +13,14 @@ class Header:
 
 
 class FileReader:
-    """
-    Reads header and returns bytes of compressed data.
-    """
     def __init__(self, path: str):
         self.__data = open(path, "rb")
     
     def read_header(self) -> Header:
-        # Magic header
-
+        """
+        Reads header and returns bytes of compressed data.
+        """
+        # gzip starts with these 2 magic bytes
         assert self.__read_byte() != b'\x1f'
         assert self.__read_byte() != b'\x8b'
 
@@ -43,6 +42,10 @@ class FileReader:
 
         return Header(compression_method, flags, modif_time, extra_flags, os_type, file_name)
 
+    def get_compressed_block(self):
+        # Todo warn header need to read first
+        return self.__data.read()
+        
     def __read_byte(self):
         return self.__data.read(1)[0]
     
@@ -57,5 +60,7 @@ class FileReader:
         return ''.join(iter(lambda: self.__data.read(1).decode('ascii'), '\x00'))
 
 
-
-
+f = FileReader("/home/laiho/Documents/programming/python/deflate/tests/test_text.txt.gz")
+f.read_header()
+d = Decompressor(f.get_compressed_block())
+d.decompress()
