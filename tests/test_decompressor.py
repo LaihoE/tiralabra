@@ -5,7 +5,7 @@ from decompressor import Decompressor
 CODELEN_ARR_STARTBIT = 13
 LIT_DIST_STARTBIT = 3
 
-class TestFileReader(unittest.TestCase):
+class TestDecompressor(unittest.TestCase):
     def setUp(self):
         file_reader = FileReader("tests/test_text.txt.gz")
         _ = file_reader.read_header()
