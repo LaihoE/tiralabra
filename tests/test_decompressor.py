@@ -1,6 +1,7 @@
 import unittest
 from file_reader import FileReader
 from decompressor import Decompressor
+from decompressor import Huffman
 
 CODELEN_ARR_STARTBIT = 13
 LIT_DIST_STARTBIT = 3
@@ -20,3 +21,10 @@ class TestDecompressor(unittest.TestCase):
         self.decompressor.bitreader.bit_idx = CODELEN_ARR_STARTBIT
         self.assertEqual(self.decompressor.bitreader.read_n_bit_int(5) + 257, 269)
         self.assertEqual(self.decompressor.bitreader.read_n_bit_int(5) + 1, 13)
+
+    def test_huffman_creator(self):
+        codes = [2, 0, 4, 3, 3, 4, 3, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 4]
+        h = Huffman(codes)
+        self.assertEqual(h.bits_to_symbol, {4: 0, 10: 3, 11: 4, 12: 6, 13: 17, 28: 2, 29: 5, 30: 7, 31: 18})
+
+

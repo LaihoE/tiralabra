@@ -6,6 +6,21 @@ import struct
 import numpy as np
 
 
+class Huffman:
+    def __init__(self, codelengths):
+        self.bits_to_symbol = {}
+        max_codelength = max(codelengths) + 1
+        nextcode = 0
+
+        for codelength in range(1, max_codelength):
+            nextcode <<= 1
+            startbit = 1 << codelength
+            for idx, codelen in enumerate(codelengths):
+                if codelen == codelength:
+                    self.bits_to_symbol[startbit + nextcode] = idx
+                    nextcode += 1
+
+
 class Decompressor:
     def __init__(self, data):
         ba = bitarray(endian='little')
@@ -33,9 +48,7 @@ class Decompressor:
         n_distcodes = self.bitreader.read_n_bit_int(5) + 1
         cla = self.generate_codelen_arr()
 
-
     def decompress(self):
-    
         is_last = self.bitreader.read_bit()
         block_type = self.bitreader.read_n_bit_int(2)
 
