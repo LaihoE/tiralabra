@@ -60,7 +60,8 @@ class FileReader:
         return ''.join(iter(lambda: self.__data.read(1).decode('ascii'), '\x00'))
 
 
-f = FileReader("/home/laiho/Documents/programming/python/deflate/tests/test_text.txt.gz")
-f.read_header()
-d = Decompressor(f.get_compressed_block())
-d.decompress()
+if __name__ == "__main__":
+    f = FileReader("tests/test_text.txt.gz")
+    f.read_header()
+    d = Decompressor(f.get_compressed_block())
+    d.decompress()
