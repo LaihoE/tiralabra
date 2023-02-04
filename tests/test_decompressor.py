@@ -9,7 +9,6 @@ SYMBOL_DECODE_STARTBIT = 65
 N_LITERAL_CODES = 269
 N_DISTCODES = 13
 
-
 class TestDecompressor(unittest.TestCase):
     def setUp(self):
         file_reader = FileReader("tests/test_text.txt.gz")

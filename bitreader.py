@@ -17,6 +17,6 @@ class BitReader:
         return out
     
     def read_n_bit_int(self, n):
-        integer = ba2int(self.bitarray[self.bit_idx : self.bit_idx + n])
+        n_bit_int = ba2int(self.bitarray[self.bit_idx : self.bit_idx + n])
         self.bit_idx += n
-        return integer
+        return n_bit_int
