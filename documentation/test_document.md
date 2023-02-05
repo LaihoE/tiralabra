@@ -1,6 +1,6 @@
 ## Test document
 
-Using typical unit tests for testing and will add some end to end test when delfate in done.
+Using typical unit tests for testing and will add some end to end test when deflate is done.
 
 The tricky part is to test the parser one part at a time. To make this easier I keep track of the current bit index so that the parser can be quickly set to a specific place in the parsing. 
 
