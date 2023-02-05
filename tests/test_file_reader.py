@@ -1,5 +1,6 @@
 import unittest
-from file_reader import FileReader
+from src.file_reader import FileReader
+
 
 class TestFileReader(unittest.TestCase):
     def setUp(self):

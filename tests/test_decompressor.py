@@ -1,13 +1,14 @@
 import unittest
-from file_reader import FileReader
-from decompressor import Decompressor
-from decompressor import Huffman
+from src.file_reader import FileReader
+from src.decompressor import Decompressor
+from src.decompressor import Huffman
 
 CODELEN_ARR_STARTBIT = 13
 LIT_DIST_STARTBIT = 3
 SYMBOL_DECODE_STARTBIT = 65
 N_LITERAL_CODES = 269
 N_DISTCODES = 13
+
 
 class TestDecompressor(unittest.TestCase):
     def setUp(self):
@@ -41,9 +42,9 @@ class TestDecompressor(unittest.TestCase):
     def test_dyn_huffman_decode(self):
         self.decompressor.bitreader.bit_idx = SYMBOL_DECODE_STARTBIT
         codes = [2, 0, 4, 3, 3, 4, 3, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 4]
-        codes = self.decompressor.generate_codelengths(Huffman(codes), N_LITERAL_CODES, N_DISTCODES)
+        codelens = self.decompressor.generate_codelengths(Huffman(codes), N_LITERAL_CODES, N_DISTCODES)
         # Ehh
-        self.assertEqual(codes, 
+        self.assertEqual(codelens,
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 7, 0, 5, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 0,

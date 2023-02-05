@@ -1,14 +1,10 @@
-from bitarray import *
-from bitarray.util import *
-from bitreader import BitReader
-from enum import Enum
-import struct
-import numpy as np
+from bitarray import bitarray
+from src.bitreader import BitReader
 
 
 class Huffman:
     def __init__(self, codelengths):
-        # Create codes that are made in a way that no key can be 
+        # Create codes that are made in a way that no key can be
         # a sub-key of another ie. this is impossible:
         # key1 = 000111   key2 = 0001
 
@@ -35,9 +31,9 @@ class Huffman:
 
 class Decompressor:
     def __init__(self, data):
-        ba = bitarray(endian='little')
-        ba.frombytes(data)
-        self.bitreader = BitReader(ba)
+        bitarr = bitarray(endian='little')
+        bitarr.frombytes(data)
+        self.bitreader = BitReader(bitarr)
 
     def generate_codelen_arr(self):
         code_len_list = [0] * 19
@@ -54,10 +50,10 @@ class Decompressor:
             code_len_list[j] = self.bitreader.read_n_bit_int(3)
         return code_len_list
 
-    def generate_codelengths(self, h, n_literal_codes, n_distcodes):
+    def generate_codelengths(self, huffman, n_literal_codes, n_distcodes):
         codes = []
         while len(codes) < n_literal_codes + n_distcodes:
-            symbol = h.interpert_next_symbol(self.bitreader)
+            symbol = huffman.interpert_next_symbol(self.bitreader)
             # 0-15 literal
             if symbol <= 15:
                 codes.append(symbol)
@@ -70,20 +66,20 @@ class Decompressor:
             if symbol == 17:
                 extra_runs = self.bitreader.read_n_bit_int(3)
                 for _ in range(3 + extra_runs):
-                    codes.append(0)                
+                    codes.append(0)
             # Repeat a code len of 0 for 11-138 times
             if symbol == 18:
                 extra_runs = self.bitreader.read_n_bit_int(7)
                 for _ in range(3 + extra_runs):
-                    codes.append(0)                
+                    codes.append(0)
         return codes
 
     def decode_huffman_tree(self):
         n_literal_codes = self.bitreader.read_n_bit_int(5) + 257
         n_distcodes = self.bitreader.read_n_bit_int(5) + 1
         codelen_arr = self.generate_codelen_arr()
-        h = Huffman(codelen_arr)
-        codes = self.generate_codelengths(h, n_literal_codes, n_distcodes)
+        huffman = Huffman(codelen_arr)
+        codes = self.generate_codelengths(huffman, n_literal_codes, n_distcodes)
 
     def decompress(self):
         is_last = self.bitreader.read_bit()

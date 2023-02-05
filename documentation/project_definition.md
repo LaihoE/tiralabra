@@ -22,7 +22,7 @@ python3 decoder.py file.gz outfile.txt
 
 
 ##### Languages for review
-Python, Rust, C, C++, Go
+Rust, C, C++, Go, Python ~ in order of most wanted to least :)
 
 ##### Study program
 bachelor’s in science (TKT)

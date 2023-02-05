@@ -1,6 +1,5 @@
-from bitstream import BitStream
 from dataclasses import dataclass
-from decompressor import Decompressor
+from src.decompressor import Decompressor
 
 @dataclass
 class Header:
@@ -15,7 +14,7 @@ class Header:
 class FileReader:
     def __init__(self, path: str):
         self.__data = open(path, "rb")
-    
+
     def read_header(self) -> Header:
         """
         Reads header and returns bytes of compressed data.
@@ -43,18 +42,17 @@ class FileReader:
         return Header(compression_method, flags, modif_time, extra_flags, os_type, file_name)
 
     def get_compressed_block(self):
-        # Todo warn header need to read first
         return self.__data.read()
-        
+
     def __read_byte(self):
         return self.__data.read(1)[0]
-    
+
     def __read_i16(self):
         return self.__read_byte() | self.__read_byte() << 8
-    
+
     def __read_i32(self):
         return self.__read_i16() | self.__read_i16() << 16
-    
+
     def __read_c_string(self):
         # Read null terminated string
         return ''.join(iter(lambda: self.__data.read(1).decode('ascii'), '\x00'))

@@ -16,5 +16,6 @@ pip install pytest coverage
 
 Get test coverage:
 ```
+coverage run -m pytest
 coverage html
 ```
