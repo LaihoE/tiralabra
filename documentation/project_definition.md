@@ -34,3 +34,4 @@ English
 https://www.ietf.org/rfc/rfc1951.txt  
 https://en.wikipedia.org/wiki/Deflate  
 https://www.youtube.com/watch?v=oi2lMBBjQ8s
+https://github.com/nayuki/Simple-DEFLATE-decompressor

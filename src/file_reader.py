@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from src.decompressor import Decompressor
+from decompressor import Decompressor
 
 @dataclass
 class Header:
@@ -59,7 +59,16 @@ class FileReader:
 
 
 if __name__ == "__main__":
-    f = FileReader("tests/test_text.txt.gz")
+    f = FileReader("src/tests/test_text.txt.gz")
     f.read_header()
     d = Decompressor(f.get_compressed_block())
     d.decompress()
+    
+    """from decompressor import History
+    import time
+    h = History(4)
+    for i in range(100):
+        time.sleep(0.5)
+        h.append(i)
+        print(h.buffer)"""
+    

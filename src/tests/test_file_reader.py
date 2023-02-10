@@ -1,10 +1,10 @@
 import unittest
-from src.file_reader import FileReader
+from file_reader import FileReader
 
 
 class TestFileReader(unittest.TestCase):
     def setUp(self):
-        self.file_reader = FileReader("tests/test_text.txt.gz")
+        self.file_reader = FileReader("src/tests/test_text.txt.gz")
 
     def test_header(self):
         header = self.file_reader.read_header()
