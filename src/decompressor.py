@@ -28,7 +28,6 @@ class Huffman:
             if bits in self.bits_to_symbol:
                 return self.bits_to_symbol[bits]
 
-
 class Decompressor:
     def __init__(self, data):
         bitarr = bitarray(endian='little')
