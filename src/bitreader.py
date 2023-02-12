@@ -18,3 +18,12 @@ class BitReader:
         n_bit_int = ba2int(self.bitarray[self.bit_idx : self.bit_idx + n])
         self.bit_idx += n
         return n_bit_int
+
+    def read_n_bytes(self, n):
+        # bytes need to be aligned ie. cant start in middle of byte
+        self.byte_align()
+        return self.bitarray[self.bit_idx : self.bit_idx + n * 8]
+    
+    def byte_align(self):
+        while self.bit_idx % 8 != 0:
+            self.read_bit()

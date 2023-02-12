@@ -38,19 +38,43 @@ class Decompressor:
         self.decompressed = []
     
     def decompress(self):
-        is_last = self.bitreader.read_bit()
-        block_type = self.bitreader.read_n_bit_int(2)
-        if block_type == 2:
-            d,l = self.decode_huffman_tree()
-            self.decompress_huffman_block(l, d)
+        while True:
+            is_last = self.bitreader.read_bit()
+            block_type = self.bitreader.read_n_bit_int(2)
+
+            if block_type == 0:
+                exit("Not implemented fully yet!")
+                self.handle_uncompressed_block()
+            if block_type == 1:
+                exit("Not implemented fully yet!")
+                self.decompress_static_huffman()
+            if block_type == 2:
+                dist, literal = self.decode_huffman_tree()
+                self.decompress_huffman_block(literal, dist)
+            if is_last:
+                return
+
+    def decompress_static_huffman(self):
+        # These are predetermined like this:
+        literal_len_codes = Huffman(([8]*144 + [9]*112 + [7]*24 + [8]*8))
+        distance_len_codes = Huffman([5] * 32)
+        self.decompress_huffman_block(literal_len_codes, distance_len_codes)
+    
+    def handle_uncompressed_block(self):
+        length = self.bitreader.read_n_bit_int(16)
+        _ = self.bitreader.read_n_bit_int(16)
+
+        byte_slice = self.bitreader.read_n_bytes(length)
+        self.decompressed.append((byte_slice, ))
+        self.byte_history.append((byte_slice, ))
 
     def decode_huffman_tree(self):
         n_literal_codes = self.bitreader.read_n_bit_int(5) + 257
         n_distcodes = self.bitreader.read_n_bit_int(5) + 1
         codelen_arr = self.generate_codelen_arr()
         
-        huffman = Huffman(codelen_arr)
-        codes = self.generate_codelengths(huffman, n_literal_codes, n_distcodes)
+        code_lengths = Huffman(codelen_arr)
+        codes = self.generate_codelengths(code_lengths, n_literal_codes, n_distcodes)
 
         literal_codes = Huffman(codes[:n_literal_codes])
         distance_codes = codes[n_literal_codes:]

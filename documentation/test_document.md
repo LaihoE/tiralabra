@@ -9,7 +9,7 @@ The tricky part is to test the parser one part at a time. To make this easier I 
 
 Install dep:
 ```
-pip install pytest coverage
+pip install pytest coverage bitarray
 ```
 
 Run tests and get test coverage:
@@ -18,12 +18,12 @@ coverage run -m pytest
 coverage html
 ```
 
-Current coverage:
+Current coverage (12.2):
 |      file       | coverage |
 | :-------------: | :------: |
-|  bitreader.py   |   100%   |
-| decompressor.py |   83%    |
-| file_reader.py  |   93%    |
+|  bitreader.py   |   94%    |
+| decompressor.py |   95%    |
+| file_reader.py  |   83%    |
 
 
 
