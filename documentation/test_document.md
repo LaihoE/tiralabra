@@ -21,10 +21,10 @@ coverage html
 Current coverage (12.2):
 |      file       | coverage |
 | :-------------: | :------: |
-|  bitreader.py   |   94%    |
-| decompressor.py |   95%    |
+|  bitreader.py   |   77%    |
+| decompressor.py |   86%    |
 | file_reader.py  |   83%    |
-
+(some parts are still under construction thats why quite low %)
 
 
 ## Pylint
