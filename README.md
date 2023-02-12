@@ -13,11 +13,16 @@
 
 Install dep:
 ```
-pip install pytest coverage
+pip install pytest coverage bitarray
 ```
 
 Get test coverage:
 ```
 coverage run -m pytest
 coverage html
+```
+
+Try example file:
+```
+python3 src/file_reader.py
 ```

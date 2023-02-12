@@ -64,15 +64,4 @@ if __name__ == "__main__":
     f.read_header()
     d = Decompressor(f.get_compressed_block())
     d.decompress()
-    out = []
-    print(bytes(d.decompressed, ))
-
-
-    """from decompressor import History
-    import time
-    h = History(4)
-    for i in range(100):
-        time.sleep(0.5)
-        h.append(i)
-        print(h.buffer)"""
-    
+    print("File contents:\n",bytes(d.decompressed,))

@@ -36,6 +36,13 @@ class Decompressor:
         self.bitreader = BitReader(bitarr)
         self.byte_history = []
         self.decompressed = []
+    
+    def decompress(self):
+        is_last = self.bitreader.read_bit()
+        block_type = self.bitreader.read_n_bit_int(2)
+        if block_type == 2:
+            d,l = self.decode_huffman_tree()
+            self.decompress_huffman_block(l, d)
 
     def decode_huffman_tree(self):
         n_literal_codes = self.bitreader.read_n_bit_int(5) + 257
@@ -55,7 +62,6 @@ class Decompressor:
             # If we have distance codes
             dist_codes = Huffman(distance_codes)
             return (dist_codes, literal_codes)
-
 
     def generate_codelen_arr(self):
         code_len_list = [0] * 19
@@ -95,13 +101,6 @@ class Decompressor:
                 for _ in range(11 + extra_runs):
                     codes.append(0)
         return codes
-
-    def decompress(self):
-        is_last = self.bitreader.read_bit()
-        block_type = self.bitreader.read_n_bit_int(2)
-        if block_type == 2:
-            d,l = self.decode_huffman_tree()
-            self.decompress_huffman_block(l, d)
 
     def decompress_huffman_block(self, literal_codes, distance_codes):
         """
