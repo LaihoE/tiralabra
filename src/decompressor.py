@@ -91,11 +91,9 @@ class Decompressor:
                     codes.append(0)
             # Repeat a code len of 0 for 11-138 times
             if symbol == 18:
-                print("SYM 18")
                 extra_runs = self.bitreader.read_n_bit_int(7)
                 for _ in range(11 + extra_runs):
                     codes.append(0)
-        print(codes)
         return codes
 
     def decompress(self):
@@ -116,7 +114,7 @@ class Decompressor:
         history = [1, 2, 3, 4, 5, 6, 7, 8, 9]
         distance = 6
         run_length = 3
-        --> history[-6:-3] == [4, 5, 6]
+        --> == [4, 5, 6]
         """
         while True:
             symbol = literal_codes.interpert_next_symbol(self.bitreader)
@@ -125,16 +123,20 @@ class Decompressor:
                 return
             # Literal byte
             if symbol < 256:
-                self.decompressed.append(bytes((symbol, )))
+                self.decompressed.append(symbol)
                 self.byte_history.append(symbol)
             elif symbol >= 256:
                 # Between 3 and 258
                 run_length = self.interpret_run_length(symbol)
                 # Between 1 and 32768
-                symbol = distance_codes.interpert_next_symbol(bitreader)
+                symbol = distance_codes.interpert_next_symbol(self.bitreader)
                 distance = self.interpret_distance(symbol)
-                # Look back "distance" amount, until run_length
-                self.decompressed.extend(self.byte_history[-distance : run_length])
+                # Look back into history "distance" amount, until run_length
+                start_idx = len(self.byte_history) - distance
+                end_idx = start_idx + run_length
+
+                self.decompressed.extend(self.byte_history[start_idx : end_idx])
+                self.byte_history.extend(self.byte_history[start_idx : end_idx])
 
     def interpret_distance(self, symbol):
         """
@@ -159,7 +161,7 @@ class Decompressor:
             return symbol + 1
         else:
             extra_bits = symbol // 2 - 1
-            return ((symbol % 2 + 2) << extra_bits) + 1 + self._read_int(extra_bits)
+            return ((symbol % 2 + 2) << extra_bits) + 1 + self.bitreader.read_n_bit_int(extra_bits)
 
     def interpret_run_length(self, symbol):
         """
@@ -182,34 +184,8 @@ class Decompressor:
         """
         if symbol == 285:
             return 258
-        if symbol < 256:
+        if symbol < 264:
             return symbol - 254
         else:
             extra_bits = (symbol - 261) // 4
             return (((symbol - 265) % 4 + 4) << extra_bits) + self.bitreader.read_n_bit_int(extra_bits) + 3
-
-
-class History:
-    """
-    Uses a circular buffer to keep history at max length, otherwise
-    we would need to shift all elements by one when appending.
-    
-    Example of this if maxlen = 3:
-    buffer = [1, 2, 3]
-    buffer.append(4) --> [4, 2, 3]
-    """
-    def __init__(self, max_length):
-        self.max_length = max_length
-        self.buffer = [0] * max_length
-        self.start = 0
-        self.end = 0
-
-    def put(self, item):
-        self.buffer[self.end] = item
-        self.end += 1
-        self.end %= self.max_length
-    
-    def get(self):
-        item = self.buffer[self.start]
-        start %= self.max_length
-        return item

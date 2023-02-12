@@ -28,6 +28,7 @@ class FileReader:
         modif_time = self.__read_i32()
         extra_flags = self.__read_byte()
         os_type = self.__read_byte()
+        file_name = ""
 
         # Just get file name, not so interested in the others
         if flags & 0x04 != 0:
@@ -63,7 +64,10 @@ if __name__ == "__main__":
     f.read_header()
     d = Decompressor(f.get_compressed_block())
     d.decompress()
-    
+    out = []
+    print(bytes(d.decompressed, ))
+
+
     """from decompressor import History
     import time
     h = History(4)

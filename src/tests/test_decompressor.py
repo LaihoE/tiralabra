@@ -74,3 +74,11 @@ class TestDecompressor(unittest.TestCase):
         dist_codes, _ = self.decompressor.decode_huffman_tree()
         # in > Python3.7 dict order is deterministic
         self.assertEqual(dist_codes.bits_to_symbol, {4: 8, 5: 10, 12: 2, 13: 6, 14: 9, 15: 12})
+
+    def test_huffman_block(self):
+        file_reader = FileReader("src/tests/test_text.txt.gz")
+        _ = file_reader.read_header()
+        self.decompressor = Decompressor(file_reader.get_compressed_block())
+        self.decompressor.decompress()
+        self.assertEqual(bytes(self.decompressor.decompressed, ),
+         b'this is test data. There is nothing interesting here. Move on. What should I write here, dont  \nhave anything interesting to say.')
