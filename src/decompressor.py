@@ -1,6 +1,7 @@
 from bitarray import bitarray
 from bitreader import BitReader
 
+MAX_HISTORY_LEN = 32 * 1024
 
 class Huffman:
     def __init__(self, codelengths):
@@ -28,12 +29,43 @@ class Huffman:
             if bits in self.bits_to_symbol:
                 return self.bits_to_symbol[bits]
 
+class History:
+    """
+    A circular buffer to keep history efficiently at max length
+    and allow wrap-around behavior needed for decompressing.
+    Wrap-around example:
+    
+    buffer = [1, 2, 3, 4] 
+    dist = 1
+    run_length = 4
+    >>> [3, 4, 1, 2]
+    """
+    def __init__(self):
+        self.buffer = [0] * MAX_HISTORY_LEN
+        self.max_len = len(self.buffer)
+        self.index = 0
+    
+    def append(self, item):
+        self.buffer[self.index] = item
+        self.index = (self.index + 1) % self.max_len
+    
+    def slice_history(self, distance, run_length):
+        byte_slice = []
+        index = (self.index - distance) % self.max_len
+        for byte_num in range(run_length):
+            # Push into history and output list
+            self.append(self.buffer[index])
+            byte_slice.append(self.buffer[index])
+            index = (index + 1) % self.max_len
+        return byte_slice
+
+
 class Decompressor:
     def __init__(self, data):
         bitarr = bitarray(endian='little')
         bitarr.frombytes(data)
         self.bitreader = BitReader(bitarr)
-        self.byte_history = []
+        self.byte_history = History()
         self.decompressed = []
     
     def decompress(self):
@@ -42,14 +74,11 @@ class Decompressor:
             block_type = self.bitreader.read_n_bit_int(2)
 
             if block_type == 0:
-                exit("Not implemented fully yet!")
                 self.handle_uncompressed_block()
             if block_type == 1:
-                exit("Not implemented fully yet!")
                 self.decompress_static_huffman()
             if block_type == 2:
-                dist, literal = self.decode_huffman_tree()
-                self.decompress_huffman_block(literal, dist)
+                self.decompress_huffman_block()
             if is_last:
                 return
 
@@ -125,8 +154,11 @@ class Decompressor:
                     codes.append(0)
         return codes
 
-    def decompress_huffman_block(self, literal_codes, distance_codes):
+    def decompress_huffman_block(self):
         """
+        The main loop that we spend most of time doing (other blocks are quite rare)
+
+        Creates 2 huffman trees and then begins decompressing from stream.
         Reads symbols from bitstream until we get the special symbol 256 (END).
         If symbol value < 256 then we use the actual value for the byte (0-255).
         If symbol >= 256 we look back into our history starting from "distance" 
@@ -138,6 +170,8 @@ class Decompressor:
         run_length = 3
         --> == [4, 5, 6]
         """
+        # Create our huffman trees
+        distance_codes, literal_codes = self.decode_huffman_tree()
         while True:
             symbol = literal_codes.interpert_next_symbol(self.bitreader)
             # Symbol 256 means end of the block
@@ -153,17 +187,13 @@ class Decompressor:
                 # Between 1 and 32768
                 symbol = distance_codes.interpert_next_symbol(self.bitreader)
                 distance = self.interpret_distance(symbol)
-                # Look back into history "distance" amount, until run_length
-                start_idx = len(self.byte_history) - distance
-                end_idx = start_idx + run_length
+                # Look back into history
+                byte_slice = self.byte_history.slice_history(distance, run_length)
+                self.decompressed.extend(byte_slice)
 
-                self.decompressed.extend(self.byte_history[start_idx : end_idx])
-                self.byte_history.extend(self.byte_history[start_idx : end_idx])
 
     def interpret_distance(self, symbol):
         """
-        Are these tables good here or do they just clutter?
-
         From https://www.ietf.org/rfc/rfc1951.txt page 11
         Extra           Extra               Extra
         Code Bits Dist  Code Bits   Dist     Code Bits Distance
@@ -186,9 +216,7 @@ class Decompressor:
             return ((symbol % 2 + 2) << extra_bits) + 1 + self.bitreader.read_n_bit_int(extra_bits)
 
     def interpret_run_length(self, symbol):
-        """
-        Are these tables here good or do they just clutter?
-        
+        """        
         From https://www.ietf.org/rfc/rfc1951.txt page 11
                 Extra               Extra               Extra
         Code Bits Length(s) Code Bits Lengths   Code Bits Length(s)

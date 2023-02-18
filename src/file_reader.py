@@ -60,7 +60,7 @@ class FileReader:
 
 
 if __name__ == "__main__":
-    f = FileReader("src/tests/test_text.txt.gz")
+    f = FileReader("/home/laiho/Documents/programming/python/deflate/data.txt.gz")
     f.read_header()
     d = Decompressor(f.get_compressed_block())
     d.decompress()
