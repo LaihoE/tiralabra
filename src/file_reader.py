@@ -30,15 +30,9 @@ class FileReader:
         os_type = self.__read_byte()
         file_name = ""
 
-        # Just get file name, not so interested in the others
-        if flags & 0x04 != 0:
-            self.__data.read(self.__read_i16())
+        # Just get file name, not so interested in the others (might break on special files)
         if flags & 0x08 != 0:
             file_name = self.__read_c_string()
-        if flags & 0x02 != 0:
-            print(f"CRC16: {self.__read_i16()}")
-        if flags & 0x10 != 0:
-            print(f"comment: {self.__read_c_string()}")
 
         return Header(compression_method, flags, modif_time, extra_flags, os_type, file_name)
 
