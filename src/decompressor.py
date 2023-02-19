@@ -1,63 +1,7 @@
 from bitarray import bitarray
-from bitreader import BitReader
-
-MAX_HISTORY_LEN = 32 * 1024
-
-class Huffman:
-    def __init__(self, codelengths):
-        # Create codes that are made in a way that no key can be
-        # a sub-key of another ie. this is impossible:
-        # key1 = 000111   key2 = 0001
-
-        self.bits_to_symbol = {}
-        max_codelength = max(codelengths) + 1
-        nextcode = 0
-
-        for codelength in range(1, max_codelength):
-            nextcode <<= 1
-            startbit = 1 << codelength
-            for idx, codelen in enumerate(codelengths):
-                if codelen == codelength:
-                    self.bits_to_symbol[startbit + nextcode] = idx
-                    nextcode += 1
-
-    def interpert_next_symbol(self, bitreader):
-        # Read bits until we find a match in our dictionary
-        bits = 1
-        while True:
-            bits = bits << 1 | bitreader.read_bit()
-            if bits in self.bits_to_symbol:
-                return self.bits_to_symbol[bits]
-
-class History:
-    """
-    A circular buffer to keep history efficiently at max length
-    and allow wrap-around behavior needed for decompressing.
-    Wrap-around example:
-    
-    buffer = [1, 2, 3, 4] 
-    dist = 1
-    run_length = 4
-    >>> [3, 4, 1, 2]
-    """
-    def __init__(self):
-        self.buffer = [0] * MAX_HISTORY_LEN
-        self.max_len = len(self.buffer)
-        self.index = 0
-    
-    def append(self, item):
-        self.buffer[self.index] = item
-        self.index = (self.index + 1) % self.max_len
-    
-    def slice_history(self, distance, run_length):
-        byte_slice = []
-        index = (self.index - distance) % self.max_len
-        for byte_num in range(run_length):
-            # Push into history and output list
-            self.append(self.buffer[index])
-            byte_slice.append(self.buffer[index])
-            index = (index + 1) % self.max_len
-        return byte_slice
+from utils import BitReader
+from utils import History
+from huffman import generate_huffman_trees, Huffman, STATIC_HUFFMAN_LITERAL_CODES, STATIC_HUFFMAN_DISTANCE_CODES
 
 
 class Decompressor:
@@ -69,98 +13,43 @@ class Decompressor:
         self.decompressed = []
     
     def decompress(self):
+        # Read blocks until end of file
         while True:
             is_last = self.bitreader.read_bit()
             block_type = self.bitreader.read_n_bit_int(2)
-
+            print(block_type)
             if block_type == 0:
                 self.handle_uncompressed_block()
-            if block_type == 1:
+            elif block_type == 1:
                 self.decompress_static_huffman()
-            if block_type == 2:
-                self.decompress_huffman_block()
+            elif block_type == 2:
+                self.decompress_huffman_block(None, None)
+
             if is_last:
                 return
 
     def decompress_static_huffman(self):
         # These are predetermined like this:
-        literal_len_codes = Huffman(([8]*144 + [9]*112 + [7]*24 + [8]*8))
-        distance_len_codes = Huffman([5] * 32)
-        self.decompress_huffman_block(literal_len_codes, distance_len_codes)
+        literal_len_codes = Huffman(STATIC_HUFFMAN_LITERAL_CODES)
+        distance_len_codes = Huffman(STATIC_HUFFMAN_DISTANCE_CODES)
+        self.decompress_huffman_block(distance_len_codes, literal_len_codes)
     
     def handle_uncompressed_block(self):
         length = self.bitreader.read_n_bit_int(16)
+        # Can be used to check for correct length
         _ = self.bitreader.read_n_bit_int(16)
 
         byte_slice = self.bitreader.read_n_bytes(length)
         self.decompressed.append((byte_slice, ))
         self.byte_history.append((byte_slice, ))
 
-    def decode_huffman_tree(self):
-        n_literal_codes = self.bitreader.read_n_bit_int(5) + 257
-        n_distcodes = self.bitreader.read_n_bit_int(5) + 1
-        codelen_arr = self.generate_codelen_arr()
-        
-        code_lengths = Huffman(codelen_arr)
-        codes = self.generate_codelengths(code_lengths, n_literal_codes, n_distcodes)
-
-        literal_codes = Huffman(codes[:n_literal_codes])
-        distance_codes = codes[n_literal_codes:]
-
-        # If no distance codes
-        if len(distance_codes) == 1 and distance_codes[0] == 0:
-            return (distance_codes, None)
-        else:
-            # If we have distance codes
-            dist_codes = Huffman(distance_codes)
-            return (dist_codes, literal_codes)
-
-    def generate_codelen_arr(self):
-        code_len_list = [0] * 19
-        # Odd order to fill arr, see: https://www.rfc-editor.org/rfc/rfc1951#page-13
-        # Not sure why it is filled in this way
-        code_len_codes = self.bitreader.read_n_bit_int(4)
-        code_len_list[16] = self.bitreader.read_n_bit_int(3)
-        code_len_list[17] = self.bitreader.read_n_bit_int(3)
-        code_len_list[18] = self.bitreader.read_n_bit_int(3)
-        code_len_list[0] = self.bitreader.read_n_bit_int(3)
-
-        for i in range(code_len_codes):
-            j = (8 + i // 2) if (i % 2 == 0) else (7 - i // 2)
-            code_len_list[j] = self.bitreader.read_n_bit_int(3)
-        return code_len_list
-
-    def generate_codelengths(self, huffman, n_literal_codes, n_distcodes):
-        codes = []
-        while len(codes) < n_literal_codes + n_distcodes:
-            symbol = huffman.interpert_next_symbol(self.bitreader)
-            # 0-15 literal
-            if symbol <= 15:
-                codes.append(symbol)
-            # Copy previous code 3-6 times
-            if symbol == 16:
-                extra_runs = self.bitreader.read_n_bit_int(2)
-                for _ in range(3 + extra_runs):
-                    codes.append(codes[-1])
-            # Repeat a code len of 0 for 3-10 times
-            if symbol == 17:
-                extra_runs = self.bitreader.read_n_bit_int(3)
-                for _ in range(3 + extra_runs):
-                    codes.append(0)
-            # Repeat a code len of 0 for 11-138 times
-            if symbol == 18:
-                extra_runs = self.bitreader.read_n_bit_int(7)
-                for _ in range(11 + extra_runs):
-                    codes.append(0)
-        return codes
-
-    def decompress_huffman_block(self):
+    def decompress_huffman_block(self, distance_codes, literal_codes):
         """
         The main loop that we spend most of time doing (other blocks are quite rare)
 
         Creates 2 huffman trees and then begins decompressing from stream.
         Reads symbols from bitstream until we get the special symbol 256 (END).
-        If symbol value < 256 then we use the actual value for the byte (0-255).
+        If symbol value < 256 then we use the actual value for the symbol (0-255).
         If symbol >= 256 we look back into our history starting from "distance" 
         indexes ago and continue for "run_length" symbols.
 
@@ -171,7 +60,8 @@ class Decompressor:
         --> == [4, 5, 6]
         """
         # Create our huffman trees
-        distance_codes, literal_codes = self.decode_huffman_tree()
+        if distance_codes == None and literal_codes == None:
+            distance_codes, literal_codes = generate_huffman_trees(self.bitreader)
         while True:
             symbol = literal_codes.interpert_next_symbol(self.bitreader)
             # Symbol 256 means end of the block
@@ -181,6 +71,7 @@ class Decompressor:
             if symbol < 256:
                 self.decompressed.append(symbol)
                 self.byte_history.append(symbol)
+            # Look back into history
             elif symbol >= 256:
                 # Between 3 and 258
                 run_length = self.interpret_run_length(symbol)
@@ -209,6 +100,7 @@ class Decompressor:
         8   3  17-24   18   8    513-768   28   13 16385-24576
         9   3  25-32   19   8   769-1024   29   13 24577-32768
         """
+        # This is decodes according to the above table
         if symbol < 4:
             return symbol + 1
         else:
@@ -232,6 +124,7 @@ class Decompressor:
         265   1  11,12      275   3   51-58     285   0    258
         266   1  13,14      276   3   59-66
         """
+        # This is decodes according to the above table
         if symbol == 285:
             return 258
         if symbol < 264:

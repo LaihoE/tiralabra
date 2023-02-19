@@ -60,7 +60,9 @@ class FileReader:
 
 
 if __name__ == "__main__":
-    f = FileReader("/home/laiho/Documents/programming/python/deflate/data.txt.gz")
+    # The DEFLATE rfc is the example file.
+    # Found here: https://www.rfc-editor.org/rfc/rfc1951
+    f = FileReader("/home/laiho/Documents/programming/python/deflate/src/tests/test.gz")
     f.read_header()
     d = Decompressor(f.get_compressed_block())
     d.decompress()

@@ -1,7 +1,7 @@
 import unittest
 from file_reader import FileReader
 from decompressor import Decompressor
-from decompressor import Huffman
+from huffman import *
 
 CODELEN_ARR_STARTBIT = 13
 LIT_DIST_STARTBIT = 3
@@ -12,13 +12,13 @@ N_DISTCODES = 13
 
 class TestDecompressor(unittest.TestCase):
     def setUp(self):
-        file_reader = FileReader("src/tests/test_text.txt.gz")
+        file_reader = FileReader("/home/laiho/Documents/programming/python/deflate/src/tests/test_text.txt.gz")
         _ = file_reader.read_header()
         self.decompressor = Decompressor(file_reader.get_compressed_block())
 
     def test_codelen_array(self):
         self.decompressor.bitreader.bit_idx = CODELEN_ARR_STARTBIT
-        arr = self.decompressor.generate_codelen_arr()
+        arr = generate_codelen_arr(self.decompressor.bitreader)
         self.assertEqual(arr, [2, 0, 4, 3, 3, 4, 3, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 4])
 
     def test_lit_and_dist_codes(self):
@@ -42,7 +42,8 @@ class TestDecompressor(unittest.TestCase):
     def test_dyn_huffman_decode(self):
         self.decompressor.bitreader.bit_idx = SYMBOL_DECODE_STARTBIT
         codes = [2, 0, 4, 3, 3, 4, 3, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 4]
-        codelens = self.decompressor.generate_codelengths(Huffman(codes), N_LITERAL_CODES, N_DISTCODES)
+        codelens = generate_codelengths(Huffman(codes), N_LITERAL_CODES, N_DISTCODES, self.decompressor.bitreader)
+        #codelens = self.decompressor.generate_codelengths(Huffman(codes), N_LITERAL_CODES, N_DISTCODES)
         # Ehh
         self.assertEqual(codelens,
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -61,7 +62,7 @@ class TestDecompressor(unittest.TestCase):
 
     def test_literal_codes(self):
         self.decompressor.bitreader.bit_idx = LIT_DIST_STARTBIT
-        _, literal_codes = self.decompressor.decode_huffman_tree()
+        _, literal_codes = generate_huffman_trees(self.decompressor.bitreader)
         # in > Python3.7 dict order is deterministic
         self.assertEqual(literal_codes.bits_to_symbol, {8: 32, 9: 116, 20: 97, 21: 101, 22: 104, 23: 110, 24: 111,
         25: 115, 52: 46, 53: 100, 54: 105, 55: 257, 56: 258, 114: 73,
@@ -71,9 +72,9 @@ class TestDecompressor(unittest.TestCase):
 
     def test_dist_codes(self):
         self.decompressor.bitreader.bit_idx = LIT_DIST_STARTBIT
-        dist_codes, _ = self.decompressor.decode_huffman_tree()
+        distance_codes, _ = generate_huffman_trees(self.decompressor.bitreader)
         # in > Python3.7 dict order is deterministic
-        self.assertEqual(dist_codes.bits_to_symbol, {4: 8, 5: 10, 12: 2, 13: 6, 14: 9, 15: 12})
+        self.assertEqual(distance_codes.bits_to_symbol, {4: 8, 5: 10, 12: 2, 13: 6, 14: 9, 15: 12})
 
     def test_huffman_block(self):
         file_reader = FileReader("src/tests/test_text.txt.gz")
@@ -82,3 +83,21 @@ class TestDecompressor(unittest.TestCase):
         self.decompressor.decompress()
         self.assertEqual(bytes(self.decompressor.decompressed, ),
          b'this is test data. There is nothing interesting here. Move on. What should I write here, dont  \nhave anything interesting to say.')
+        
+    def test_uncompressed_block(self):
+        file_reader = FileReader("src/tests/block_1.gz")
+        _ = file_reader.read_header()
+        self.decompressor = Decompressor(file_reader.get_compressed_block())
+        self.decompressor.decompress()
+        self.assertEqual(bytes(self.decompressor.decompressed, ),
+         b'abcdefghijkl')
+
+
+    def test_end_2_end(self):
+        file_reader = FileReader("src/tests/test.gz")
+        _ = file_reader.read_header()
+        self.decompressor = Decompressor(file_reader.get_compressed_block())
+        self.decompressor.decompress()
+        with open("src/tests/uncompressed.txt", "rb") as f:
+            uncomp = f.read()
+            self.assertEqual(bytes(self.decompressor.decompressed, ), uncomp)
