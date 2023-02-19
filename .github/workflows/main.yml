@@ -16,10 +16,8 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.8
-      - name: Install Poetry
-        run: pip install poetry
       - name: Install dependencies
-        run: poetry install
+        run: pip install pytest coverage bitarray
       - name: Run tests
         run: poetry run coverage run --branch -m pytest
       - name: Coverage report
