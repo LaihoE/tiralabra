@@ -12,7 +12,7 @@ N_DISTCODES = 13
 
 class TestDecompressor(unittest.TestCase):
     def setUp(self):
-        file_reader = FileReader("/home/laiho/Documents/programming/python/deflate/src/tests/test_text.txt.gz")
+        file_reader = FileReader("src/tests/test_text.txt.gz")
         _ = file_reader.read_header()
         self.decompressor = Decompressor(file_reader.get_compressed_block())
 
