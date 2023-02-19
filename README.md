@@ -11,18 +11,20 @@
 
 
 
+## Run tests:
+
 Install dep:
 ```
-pip install pytest coverage bitarray
+pip install poetry
+poetry install
 ```
 
-Get test coverage:
+Run tests:
 ```
-coverage run -m pytest
-coverage html
+poetry run pytest
 ```
 
 Try example file:
 ```
-python3 src/file_reader.py
+poetry run python3 src/file_reader.py
 ```

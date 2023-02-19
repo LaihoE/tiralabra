@@ -9,13 +9,13 @@ The tricky part is to test the parser one part at a time. To make this easier I 
 
 Install dep:
 ```
-pip install pytest coverage bitarray
+pip install poetry
+poetry install
 ```
 
-Run tests and get test coverage:
+Run tests and get test coverage (from root dir):
 ```
-coverage run -m pytest
-coverage html
+poetry run pytest
 ```
 
 Current coverage (12.2):
@@ -25,7 +25,3 @@ Current coverage (12.2):
 | decompressor.py |   86%    |
 | file_reader.py  |   83%    |
 (some parts are still under construction thats why quite low %)
-
-
-## Pylint
-If you want to try pylint then install pylint: ```pip install pylint``` and run ```pylint src```. Currently gives 8/10 but with meh warnings atm.
