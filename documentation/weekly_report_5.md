@@ -1,2 +1,3 @@
 18.2 Finished the rest of implementaion. Should work on all files. Started cleaning up code, for example moved huffman stuff to its own file. Added some end to end tests.
 
+19.2 More cleaning up, code coverage badge etc. Still need to find a way to generate block type 00 (uncompressed). Core functionality is done now. Should only be refactors if any changes to code. Still some lacking docs that need to be fixed up and minor tests.

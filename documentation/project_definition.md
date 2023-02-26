@@ -12,8 +12,6 @@ Deflate allows 3 different modes:
 The goal is to support all 3 ways.
 
 
-
-
 ##### Goal
 The end goal is that the user can uncompress a file like so:
 ```bash
