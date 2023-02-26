@@ -1,6 +1,6 @@
 ## Test document
 
-The tricky part is to test the parser one part at a time. To make this easier I keep track of the current bit index so that the parser can be quickly set to a specific place in the parsing. 
+The project is tested in parts with unit tests and also with some end to end tests. Nothing too interesting here.
 
 
 ## Run tests:
