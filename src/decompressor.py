@@ -100,7 +100,7 @@ class Decompressor:
         8   3  17-24   18   8    513-768   28   13 16385-24576
         9   3  25-32   19   8   769-1024   29   13 24577-32768
         """
-        # This is decodes according to the above table
+        # This decodes according to the above table
         if symbol < 4:
             return symbol + 1
         else:
@@ -124,7 +124,7 @@ class Decompressor:
         265   1  11,12      275   3   51-58     285   0    258
         266   1  13,14      276   3   59-66
         """
-        # This is decodes according to the above table
+        # This decodes according to the above table
         if symbol == 285:
             return 258
         if symbol < 264:
