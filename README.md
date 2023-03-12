@@ -2,7 +2,7 @@
 
 ## Documentation
 
-[Useage instructions](https://github.com/LaihoE/tiralabra/blob/main/documentation/useage_instructions.md) 
+[Useage instructions](https://github.com/LaihoE/tiralabra/blob/main/documentation/useage_instructions.md)  
 [Project definition](https://github.com/LaihoE/tiralabra/blob/main/documentation/project_definition.md)  
 [Test document](https://github.com/LaihoE/tiralabra/blob/main/documentation/test_document.md)  
 [Implementation](https://github.com/LaihoE/tiralabra/blob/main/documentation/implementation.md) 
