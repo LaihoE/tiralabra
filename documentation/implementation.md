@@ -40,11 +40,10 @@ is just an abstraction over the bytes that lets us easily manipulate bits. This 
 Keeps track of bytes decompressed so far. It's a circular buffer data structure.
 
 
+# Performance
+Since the parser is written in Python it is difficult to get reasonable performance compared to lower level languages. I compared this implementation against gzip tool and the difference is quite big:
 
-## Performance
+| gzip      | This       |
+| --------- | ---------- |
+| 9 seconds | 8min 23sec |
 
-### Big O
-I'm not so sure Big O notation is very interesting for this project. The algorithm is obviously linear with respect to how many bytes we are decompressing. Maybe ill look into this slightly more later.. maybe the specific functions can be analysed.
-
-### Space and speed
-to be continued

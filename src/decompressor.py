@@ -1,7 +1,7 @@
 from bitarray import bitarray
 from utils import BitReader
 from utils import History
-from huffman import generate_huffman_trees, Huffman, STATIC_HUFFMAN_LITERAL_CODES, STATIC_HUFFMAN_DISTANCE_CODES
+from huffman import Huffman, STATIC_HUFFMAN_LITERAL_CODES, STATIC_HUFFMAN_DISTANCE_CODES
 
 
 class Decompressor:
@@ -17,7 +17,6 @@ class Decompressor:
         while True:
             is_last = self.bitreader.read_bit()
             block_type = self.bitreader.read_n_bit_int(2)
-            print(block_type)
             if block_type == 0:
                 self.handle_uncompressed_block()
             elif block_type == 1:
@@ -61,7 +60,7 @@ class Decompressor:
         """
         # Create our huffman trees
         if distance_codes == None and literal_codes == None:
-            distance_codes, literal_codes = generate_huffman_trees(self.bitreader)
+            distance_codes, literal_codes = Huffman.generate_huffman_trees(self.bitreader)
         while True:
             symbol = literal_codes.interpert_next_symbol(self.bitreader)
             # Symbol 256 means end of the block
@@ -82,7 +81,6 @@ class Decompressor:
                 byte_slice = self.byte_history.slice_history(distance, run_length)
                 self.decompressed.extend(byte_slice)
 
-
     def interpret_distance(self, symbol):
         """
         From https://www.ietf.org/rfc/rfc1951.txt page 11
@@ -100,7 +98,8 @@ class Decompressor:
         8   3  17-24   18   8    513-768   28   13 16385-24576
         9   3  25-32   19   8   769-1024   29   13 24577-32768
         """
-        # This decodes according to the above table
+        # This decodes according to the above table. Read n bits into
+        # an integer to get our value 
         if symbol < 4:
             return symbol + 1
         else:
@@ -124,7 +123,8 @@ class Decompressor:
         265   1  11,12      275   3   51-58     285   0    258
         266   1  13,14      276   3   59-66
         """
-        # This decodes according to the above table
+        # This decodes according to the above table. Read n bits into
+        # an integer to get our value 
         if symbol == 285:
             return 258
         if symbol < 264:

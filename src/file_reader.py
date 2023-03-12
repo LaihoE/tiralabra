@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from decompressor import Decompressor
+import sys
 
 @dataclass
 class Header:
@@ -56,7 +57,7 @@ class FileReader:
 if __name__ == "__main__":
     # The DEFLATE rfc is the example file.
     # Found here: https://www.rfc-editor.org/rfc/rfc1951
-    f = FileReader("src/tests/test.gz")
+    f = FileReader(sys.argv[1])
     f.read_header()
     d = Decompressor(f.get_compressed_block())
     d.decompress()
