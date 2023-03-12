@@ -18,7 +18,7 @@ class TestDecompressor(unittest.TestCase):
 
     def test_codelen_array(self):
         self.decompressor.bitreader.bit_idx = CODELEN_ARR_STARTBIT
-        arr = generate_codelen_arr(self.decompressor.bitreader)
+        arr = Huffman.generate_codelen_arr(self.decompressor.bitreader)
         self.assertEqual(arr, [2, 0, 4, 3, 3, 4, 3, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 4])
 
     def test_lit_and_dist_codes(self):
@@ -42,7 +42,7 @@ class TestDecompressor(unittest.TestCase):
     def test_dyn_huffman_decode(self):
         self.decompressor.bitreader.bit_idx = SYMBOL_DECODE_STARTBIT
         codes = [2, 0, 4, 3, 3, 4, 3, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 4]
-        codelens = generate_codelengths(Huffman(codes), N_LITERAL_CODES, N_DISTCODES, self.decompressor.bitreader)
+        codelens = Huffman.generate_codelengths(Huffman(codes), N_LITERAL_CODES, N_DISTCODES, self.decompressor.bitreader)
         #codelens = self.decompressor.generate_codelengths(Huffman(codes), N_LITERAL_CODES, N_DISTCODES)
         # Ehh
         self.assertEqual(codelens,
@@ -62,7 +62,7 @@ class TestDecompressor(unittest.TestCase):
 
     def test_literal_codes(self):
         self.decompressor.bitreader.bit_idx = LIT_DIST_STARTBIT
-        _, literal_codes = generate_huffman_trees(self.decompressor.bitreader)
+        _, literal_codes = Huffman.generate_huffman_trees(self.decompressor.bitreader)
         # in > Python3.7 dict order is deterministic
         self.assertEqual(literal_codes.bits_to_symbol, {8: 32, 9: 116, 20: 97, 21: 101, 22: 104, 23: 110, 24: 111,
         25: 115, 52: 46, 53: 100, 54: 105, 55: 257, 56: 258, 114: 73,
@@ -72,7 +72,7 @@ class TestDecompressor(unittest.TestCase):
 
     def test_dist_codes(self):
         self.decompressor.bitreader.bit_idx = LIT_DIST_STARTBIT
-        distance_codes, _ = generate_huffman_trees(self.decompressor.bitreader)
+        distance_codes, _ = Huffman.generate_huffman_trees(self.decompressor.bitreader)
         # in > Python3.7 dict order is deterministic
         self.assertEqual(distance_codes.bits_to_symbol, {4: 8, 5: 10, 12: 2, 13: 6, 14: 9, 15: 12})
 
