@@ -1,8 +1,0 @@
-.vscode
-.DS_Store
-.coverage
-.pytest_cache
-htmlcov
-coverage.xml
-__pycache__
-.venv

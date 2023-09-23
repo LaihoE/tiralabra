@@ -1,6 +1,5 @@
 from bitarray import bitarray
-from utils import BitReader
-from utils import History
+from utils import BitReader, History
 from huffman import Huffman, STATIC_HUFFMAN_LITERAL_CODES, STATIC_HUFFMAN_DISTANCE_CODES
 
 

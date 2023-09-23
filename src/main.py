@@ -55,10 +55,8 @@ class FileReader:
 
 
 if __name__ == "__main__":
-    # The DEFLATE rfc is the example file.
-    # Found here: https://www.rfc-editor.org/rfc/rfc1951
     if len(sys.argv) < 2:
-        exit("No file input. Input your file as first and only argument")
+        exit("No input file. Input your file path as first and only argument")
     f = FileReader(sys.argv[1])
     f.read_header()
     d = Decompressor(f.get_compressed_block())

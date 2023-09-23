@@ -1,28 +1,12 @@
-# Deflate
-
-## Documentation
-
-[Useage instructions](https://github.com/LaihoE/tiralabra/blob/main/documentation/useage_instructions.md)  
-[Project definition](https://github.com/LaihoE/tiralabra/blob/main/documentation/project_definition.md)  
-[Test document](https://github.com/LaihoE/tiralabra/blob/main/documentation/test_document.md)  
-[Implementation](https://github.com/LaihoE/tiralabra/blob/main/documentation/implementation.md) 
+# gzip decoder in ~300 lines of python
 
 
+Only requirement is bitarray: ```pip install bitarray```
 
-## Run tests:
 
-Install dep:
-```
-pip install poetry
-poetry install
+useage:
+```Python
+python3 main.py path_to_file.gz
 ```
 
-Run tests:
-```
-poetry run pytest
-```
-
-Try example file:
-```
-poetry run python3 src/file_reader.py
-```
+You can for example create a text file and: ```gzip my_file.txt```
